@@ -1,2 +1,3 @@
 # Comfy-Fire
-Terminal fire art animation written in Rust
+Fire art using SDL2 and Rust
+
