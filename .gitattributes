@@ -1,0 +1,20 @@
+# Auto detect text files and perform normalization
+*          text=auto
+
+# Git
+.gitattributes	text
+.gitignore	text
+
+# LICENSE
+LICENSE	text
+
+# Markdown
+*.md	text diff=markdown
+
+# Rust
+*.rs       text diff=rust
+*.toml     text diff=toml
+Cargo.lock text
+
+# JSON
+*.json	text
