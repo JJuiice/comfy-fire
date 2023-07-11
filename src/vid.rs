@@ -12,14 +12,22 @@ pub struct Sdl2Sys {
 
 impl Sdl2Sys {
 	pub fn new() -> Sdl2Sys {
-		let ctx = sdl2::init().unwrap();
-		let vid = ctx.video().unwrap();
-		let win = vid.window("Comfy Fire", 800, 600).position_centered().build().unwrap();
-		let mut canvas = win.into_canvas().build().unwrap();
+		// Constants for window sizing
+		const HEIGHT: u32 = 600;
+		const WIDTH: u32 = 800;
+
+		// Set up SDL Context, VideoSubsystem, Window, and Canvas
+		let ctx: sdl2::Sdl = sdl2::init().unwrap();
+		let vid: sdl2::VideoSubsystem = ctx.video().unwrap();
+		let win: sdl2::video::Window = vid.window("Comfy Fire", WIDTH, HEIGHT).position_centered().build().unwrap();
+		let mut canvas: sdl2::render::WindowCanvas = win.into_canvas().build().unwrap();
+
+		// Initialize blank screen
 		canvas.set_draw_color(Color::RGB(0, 0, 0));
 		canvas.clear();
 		canvas.present();
 
+		// Instantiate and return Sdl2Sys struct
 		Sdl2Sys {
 			ctx: ctx,
 			// vid: vid,
@@ -28,23 +36,20 @@ impl Sdl2Sys {
 		}
 	}
 
-	pub fn set_draw_color(&mut self, color: sdl2::pixels::Color) {
-		self.canvas.set_draw_color(color);
-		// self.canvas.clear();
+	pub fn init_fire(&mut self) {
+		// Initialize fire image
+		let mut g_val: u8 = 255;
 		let mut i = 0;
-		while i < self.canvas.window().size().0.try_into().unwrap() {
-			// let _ = self.canvas.draw_point(Point::new(i, self.canvas.window().size().1.try_into().unwrap()));
-			let _ = self.canvas.draw_point(Point::new(i, 599));
-			i = i + 3;
+		// I feel like this loop is pretty unoptimized, so I should probably fix it once I learn to git gud at Rust
+		while g_val > 0 {
+			self.canvas.set_draw_color(Color::RGB(255, g_val, 0));
+			while i < self.canvas.window().size().0.try_into().unwrap() {
+				let _ = self.canvas.draw_point(Point::new(i, TryInto::<i32>::try_into(self.canvas.window().size().1).unwrap() - 1 - i32::from(255 - g_val)));
+				i = i + 4;
+			}
+			g_val = g_val - 1;
+			i = 0;
 		}
-		// let ps: [Point; self.canvas.window().size().0.try_into().unwrap() / 2];
-		// let ps = (0..self.canvas.window().size().0.try_into().unwrap()).filter(|x| x % 2 == 0)
-		// let p1 = Point::new(0, 100);
-		// let p2 = Point::new(self.canvas.window().size().0.try_into().unwrap(), 100);
-		// let _ = self.canvas.draw_line(p1, p2);
-	}
-
-	pub fn show_draw_color(&mut self) {
 		self.canvas.present();
 	}
 
