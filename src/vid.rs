@@ -1,21 +1,23 @@
 extern crate sdl2;
 
+use rand::Rng;
+
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 
+// Constants for window sizing
+const WIDTH: u32 = 1280;
+const HEIGHT: u32 = 720;
+
 pub struct Sdl2Sys {
 	ctx: sdl2::Sdl,
-	// vid: sdl2::VideoSubsystem,
-	// win: sdl2::video::Window,
-	canvas: sdl2::render::WindowCanvas
+	canvas: sdl2::render::WindowCanvas,
+	rng: rand::rngs::ThreadRng,
+	spark_ps: [Point; 10]
 }
 
 impl Sdl2Sys {
 	pub fn new() -> Sdl2Sys {
-		// Constants for window sizing
-		const HEIGHT: u32 = 600;
-		const WIDTH: u32 = 800;
-
 		// Set up SDL Context, VideoSubsystem, Window, and Canvas
 		let ctx: sdl2::Sdl = sdl2::init().unwrap();
 		let vid: sdl2::VideoSubsystem = ctx.video().unwrap();
@@ -30,30 +32,45 @@ impl Sdl2Sys {
 		// Instantiate and return Sdl2Sys struct
 		Sdl2Sys {
 			ctx: ctx,
-			// vid: vid,
-			// win: win,
-			canvas: canvas
+			canvas: canvas,
+			rng: rand::thread_rng(),
+			spark_ps: [Point::new((HEIGHT - (HEIGHT / 4) - 50) as i32, 0); 10]
 		}
 	}
 
 	pub fn init_fire(&mut self) {
-		// Initialize fire image
-		let mut g_val: u8 = 255;
-		let mut i = 0;
-		// I feel like this loop is pretty unoptimized, so I should probably fix it once I learn to git gud at Rust
-		while g_val > 0 {
-			self.canvas.set_draw_color(Color::RGB(255, g_val, 0));
-			while i < self.canvas.window().size().0.try_into().unwrap() {
-				let _ = self.canvas.draw_point(Point::new(i, TryInto::<i32>::try_into(self.canvas.window().size().1).unwrap() - 1 - i32::from(255 - g_val)));
-				i = i + 4;
+		let mut points: [[Point; 640]; 180] = [[Point::new(0, 0); (WIDTH / 2) as usize]; (HEIGHT / 4) as usize];
+
+		for y in 0..(HEIGHT / 4) {
+			for x in 0..(WIDTH / 2) {
+				points[y as usize][x as usize] = points[y as usize][x as usize].offset((x * 2) as i32, (HEIGHT - (y * 2)) as i32);
 			}
-			g_val = g_val - 1;
-			i = 0;
+
+			let grad_factor: f64 = 1.0 - (f64::from(y as u32) + 1.0) / (f64::from(HEIGHT) / 4.0);
+			self.canvas.set_draw_color(Color::RGB(255, (255.0 * grad_factor).floor() as u8, 0));
+			self.canvas.draw_points(points[y as usize].as_slice()).unwrap();
 		}
+
 		self.canvas.present();
 	}
 
-	pub fn get_evt_pump(&self) -> sdl2::EventPump {
+	pub fn run_anim(&mut self) {
+		self.canvas.set_draw_color(Color::RGB(0, 0, 0));
+
+		let _ = self.canvas.draw_points(self.spark_ps.as_slice()).unwrap();
+
+		for point in &mut self.spark_ps {
+			*point = Point::new(self.rng.gen_range(0..WIDTH) as i32, (HEIGHT - (HEIGHT / 2) - 50) as i32);
+		}
+
+		self.canvas.set_draw_color(Color::RGB(255, 120, 0));
+
+		let _ = self.canvas.draw_points(self.spark_ps.as_slice()).unwrap();
+
+		self.canvas.present();
+	}
+
+	pub fn get_evt_pump(&mut self) -> sdl2::EventPump {
 		self.ctx.event_pump().unwrap()
 	}
 }
