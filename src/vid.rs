@@ -6,8 +6,8 @@ use sdl2::pixels::Color;
 use sdl2::rect::Point;
 
 // Constants for window sizing
-const WIDTH: u32 = 1280;
-const HEIGHT: u32 = 720;
+const WIDTH: u32 = 640;
+const HEIGHT: u32 = 360;
 
 pub struct Sdl2Sys {
 	ctx: sdl2::Sdl,
@@ -39,7 +39,7 @@ impl Sdl2Sys {
 	}
 
 	pub fn init_fire(&mut self) {
-		let mut points: [[Point; 640]; 180] = [[Point::new(0, 0); (WIDTH / 2) as usize]; (HEIGHT / 4) as usize];
+		let mut points = [[Point::new(0, 0); (WIDTH / 2) as usize]; (HEIGHT / 4) as usize];
 
 		for y in 0..(HEIGHT / 4) {
 			for x in 0..(WIDTH / 2) {
