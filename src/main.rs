@@ -1,35 +1,23 @@
-mod vid;
+use colored::Colorize;
 
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
-
-use std::time::Duration;
+const FIRE_COLOR_PALETTE : [&str; 11] = [
+                                            "#000000", // Black
+                                            "#400000", // Red-Black
+                                            "#700000", // Darkest Red
+                                            "#910000", // Dark Red
+                                            "#D00000", // Red
+                                            "#FFA000", // Dark Orange
+                                            "#FFAA00", // Orange
+                                            "#FFCC00", // Light Orange
+                                            "#FFFF00", // Yellow
+                                            "#FFFFA0", // Light Yellow
+                                            "#FFFFF0", // Off-White
+                                        ];
 
 pub fn main() {
-    let mut sdl2sys: vid::Sdl2Sys = vid::Sdl2Sys::new();
+    let termsize::Size { rows: _, cols } = termsize::get().unwrap();
 
-    sdl2sys.init_fire();
-
-    let mut evt_pump = sdl2sys.get_evt_pump();
-    let mut frame_delay: u8 = 30;
-    'running: loop {
-        for evt in evt_pump.poll_iter() {
-            match evt {
-                Event::Quit {..} |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running
-                },
-                _ => {}
-            }
-        }
-
-        frame_delay -= 1;
-        if frame_delay <= 0 {
-            sdl2sys.run_anim();
-            frame_delay = 30;
-        }
-
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
-    }
-
+    for color in FIRE_COLOR_PALETTE.iter() {
+        println!("{}", "@".repeat(cols as usize).color(*color));
+    }    
 }
